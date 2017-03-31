@@ -92,6 +92,7 @@ function createGridForSetExpr()
         m_GridView.enableAutoWidth(true);
         m_GridView.enableValidation(true,false,false,true); 
         m_GridView.setColValidators("NotEmpty,,,BrackedOpenValidation");
+        m_GridView.attachEvent("onCellChanged",initParameterLink)
         m_GridView.init();
         l_operatorCombo = m_GridView.getColumnCombo(1);
         l_operatorCombo.enableFilteringMode(true);
@@ -131,6 +132,25 @@ function createGridForSetExpr()
 
 
         m_GridView.addRow("1","adasda,empty,1");
+        m_GridView.addRow("2","ddddd,empty,0");
+    }
+}
+function initParameterLink(rID,cInd,nValue)
+{
+    //rId	mixed	the id of a row
+    //cInd	number	the index of a column
+    //nValue	mixed	a new value
+    if (cInd == 5)
+    {
+        m_GridView.cells(rID,6).setValue("set parameters");
+       switch(nValue)
+       {
+           case "set":
+           alert("ko praim e choveeeek");
+           break;
+           default:
+           break;
+       }
     }
 }
 dhtmlxValidation.isBrackedOpenValidation = function(p_value)
