@@ -31,7 +31,7 @@ function createComplienceTree() {
     // ]
     });
 		//m_TreeView = new dhtmlXTreeView("treeComplienceView");
-        m_Layout.cells("b").setWidth(700);
+        m_Layout.cells("b").setWidth(850);
         m_Layout.cells("a").setText("Structure Tree");
         m_Layout.cells("b").setText("Edit node")
         m_TreeView= m_Layout.cells("a").attachTreeView();
@@ -101,8 +101,8 @@ function createGridForSetExpr()
             ["and","AND"],
             ["or","OR"],
             ["not","NOT"],
-            ["nand","NOT AND"],
-            ["nor","NOT OR"]
+            ["nand","AND NOT"],
+            ["nor","OR NOT"]
         ]);
 
         l_fieldCombo = m_GridView.getColumnCombo(4);
@@ -131,8 +131,8 @@ function createGridForSetExpr()
         ]); 
 
 
-        m_GridView.addRow("1","adasda,empty,1");
-        m_GridView.addRow("2","ddddd,empty,0");
+        m_GridView.addRow("1","test1,empty,1");
+        m_GridView.addRow("2","test2,empty,0");
     }
 }
 function initParameterLink(rID,cInd,nValue)
@@ -142,13 +142,15 @@ function initParameterLink(rID,cInd,nValue)
     //nValue	mixed	a new value
     if (cInd == 5)
     {
-        m_GridView.cells(rID,6).setValue("set parameters");
+       
        switch(nValue)
        {
            case "set":
-           alert("ko praim e choveeeek");
+            m_GridView.cells(rID,6).setValue("set parameters");
+           alert("set case");
            break;
            default:
+            m_GridView.cells(rID,6).setValue("");
            break;
        }
     }

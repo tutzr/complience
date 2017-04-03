@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>model check</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <script type="text/javascript" src="complienceModel.js"></script>
+<style>
+
+</style>
+<script type="text/javascript">
+    g_CompianceRules = new ComplianceRules();
+
+    function insertFromHTML(){
+        g_CompianceRules.addSet(document.getElementById("txtName").value);
+        alert(g_CompianceRules.compSetArray[0]);
+    }
+ </script>
+</head>
+<body >
+    <div id="layoutObj">   
+        <form action="/action_page.php">
+        set name: <input type="text" name="fname" id="txtName"><br>
+        <input type="button" value="Add set" onclick="insertFromHTML()">
+        </form>
+    </div>
+</body>
+</html>
