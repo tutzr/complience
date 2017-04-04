@@ -3,7 +3,7 @@ function complianceObj(){
     this.mSetExprArray = [];
     this.mPosFilterArray = [];
     this.mPosFilterExprArray = [];
-
+    this.mSetArray.push(new SetObj("positions"));
     this.createSetObj = function(pName){
         if (pName !== "") {
             this.mSetArray.push(new SetObj(pName));
@@ -57,6 +57,7 @@ function PosFilterObj(pName)
     this.name = pName;
     this.expressions= [];
 }
+
 function SetExpr(pExprName,pSetName, pType, pAdditionalParams) {
     this.name=pExprName;
     this.exprSetName = pSetName;
@@ -64,9 +65,18 @@ function SetExpr(pExprName,pSetName, pType, pAdditionalParams) {
     if (pAdditionalParams.length > 0)
     {
         this.externalExpr = pAdditionalParams[0];
-        if(pAdditionalParams.length > 1) {
-            this.exprStart = pAdditionalParams[1];
-            this.exprSize = pAdditionalParams[2];
+        this.operator = pAdditionalParams[1];
+        if(pAdditionalParams.length > 2) {
+            this.exprStart = pAdditionalParams[2];
+            this.exprSize = pAdditionalParams[3];
         }
     }
+}
+
+function PosFilterExprObj(pName, pType, pRef, pOperator)
+{
+    this.name = pName;
+    this.type = pType;
+    this.refIndex = pRef;//potentoally findExpr
+    this.operator = pOperator;
 }

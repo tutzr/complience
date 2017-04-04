@@ -1,10 +1,15 @@
 //table fields demo
 var demofields =["positionname","currency", "market value", "instrument type", "notional ammount"];
 
+var g_modelObj;
 var m_Layout;
 var m_TreeView;
 var m_GridView;
 var m_ContexMenu;
+var m_ToolBar;
+var m_filterCombo;
+var m_Tabbar;
+var idRow;
 function createComplienceTree() {
 
     m_Layout = new dhtmlXLayoutObject({
@@ -39,6 +44,8 @@ function createComplienceTree() {
         m_TreeView.attachEvent("onContextMenu", ContexMenuHandler);
 		enable();
 		
+        g_modelObj = new complianceObj();
+
         m_TreeView.openItem("1", false);
 		m_TreeView.selectItem("1");
 }
@@ -80,21 +87,51 @@ function contexMenuListener(menuitemId,type)
     }
 }
 
+
 function createGridForSetExpr()
 {
+    idRow = 1;
     if (m_GridView == null)
     {
-        m_GridView = m_Layout.cells("b").attachGrid(); //m_TreeView.attachEvent;
-        m_GridView.setImagePath("../codebase/imgs/")
-        m_GridView.setHeader("Expression Name,Operator,Included,(...,Field,Aggregation,parameters,...)");
-        m_GridView.setColAlign("left,left,left,left,left,left,center,right");
-        m_GridView.setColTypes("ed,combo,ch,ed,combo,combo,link,ed");
-        m_GridView.enableAutoWidth(true);
-        m_GridView.enableValidation(true,false,false,true); 
-        m_GridView.setColValidators("NotEmpty,,,BrackedOpenValidation");
-        m_GridView.attachEvent("onCellChanged",initParameterLink)
+        m_Tabbar = m_Layout.cells("b").attachTabbar({
+				tabs: [
+					{ id: "setTab1", text: "Set tab", active: true }
+				]
+			});
+
+
+        m_ToolBar = m_Tabbar.tabs("setTab1").attachToolbar({
+
+        });
+        m_ToolBar.addText("name", 0, "Set name", "", "");
+        m_ToolBar.addInput("txtName",1,"",200);
+        m_ToolBar.addSeparator("sep1", 2)
+        m_ToolBar.addButton("btnInsert",3,"Insert expression");
+        m_ToolBar.addSeparator("sep2", 4)
+        m_ToolBar.addButton("btnSave",5,"Save");
+        m_ToolBar.addButton("btnClear",6,"Clear");
+        m_ToolBar.addButton("btnCancel",7,"Cancel");
+        m_ToolBar.attachEvent("onClick",onClickListenerToolbar);
+
+
+        
+        
+
+    }
+}
+function initGridSetObj()
+{
+    m_GridView = m_Tabbar.tabs("setTab1").attachGrid(); //m_TreeView.attachEvent;
+        m_GridView.setImagePath("../codebase/imgs/");
+        m_GridView.setColAlign("center,left,left,right,left,left,left,left,left");
+        m_GridView.setHeader("Mark,Name,Operator,(...,Aggregation,Set,Filter,parameters,...)");
+        m_GridView.setColTypes("ch,ed,combo,ed,combo,combo,combo,ed,ed");
+        m_GridView.setInitWidths("37,70,75,25,80,,,70,22");
+        m_GridView.enableValidation(false,false,false,true,false,false,false,false,true); 
+        m_GridView.setColValidators(",NotEmpty,,BrackedOpenValidation,NotEmpty,NotEmpty,,,BrackedCloseValidation");
+        m_GridView.attachEvent("onCellChanged",onCellChangedListener)
         m_GridView.init();
-        l_operatorCombo = m_GridView.getColumnCombo(1);
+        l_operatorCombo = m_GridView.getColumnCombo(2);
         l_operatorCombo.enableFilteringMode(true);
         l_operatorCombo.addOption([
             ["empty"," "],
@@ -105,59 +142,98 @@ function createGridForSetExpr()
             ["nor","OR NOT"]
         ]);
 
-        l_fieldCombo = m_GridView.getColumnCombo(4);
+        l_fieldCombo = m_GridView.getColumnCombo(5);
         l_fieldCombo.enableFilteringMode(true);
         var jsonArg1 = new Object();
         
-        for (i =0 ; i < demofields.length; i++)
+        for (i =0 ; i < g_modelObj.mSetArray.length; i++)
         {
             var toParseJsonArray = new Array();
-            jsonArg1.text = demofields[i];
-            jsonArg1.value = demofields[i];
+            jsonArg1.text = g_modelObj.mSetArray[i].name;
+            jsonArg1.value = g_modelObj.mSetArray[i].name;
             toParseJsonArray.push(jsonArg1);
               var fieldArray = JSON.parse(JSON.stringify(toParseJsonArray));
             l_fieldCombo.addOption(fieldArray);
         }
-      
 
-        l_aggregationCombo = m_GridView.getColumnCombo(5);
+        l_aggregationCombo = m_GridView.getColumnCombo(4);
         l_aggregationCombo.enableFilteringMode(true);
         l_aggregationCombo.addOption([
-            ["name","name"],
             ["set","set"],
             ["subset","subset"],
             ["max","max"],
             ["min","min"]
-        ]); 
+        ]);
 
+        l_filterCombo = m_GridView.getColumnCombo(6);
+        l_filterCombo.enableFilteringMode(true);
+}
 
-        m_GridView.addRow("1","test1,empty,1");
-        m_GridView.addRow("2","test2,empty,0");
+function onClickListenerToolbar(id)
+{
+    switch (id)
+    {
+        case "btnSave":
+        name = m_ToolBar.getValue("txtName");
+        g_modelObj.createSetObj(name);
+        m_Tabbar.tabs("setTab1").setText(name);
+        m_TreeView.addItem(name,name,"1");
+        initGridSetObj();
+        break;
+        case "btnInsert":
+        m_GridView.addRow(idRow,"1,new,empty");
+        idRow++;
+        break;
+        default:
+        break;
     }
 }
-function initParameterLink(rID,cInd,nValue)
+
+function onCellChangedListener(rID,cInd,nValue)
 {
     //rId	mixed	the id of a row
     //cInd	number	the index of a column
     //nValue	mixed	a new value
-    if (cInd == 5)
+    if (cInd == 4)
     {
-       
+       l_filterCombo.clearAll();
        switch(nValue)
        {
-           case "set":
-            m_GridView.cells(rID,6).setValue("set parameters");
-           alert("set case");
+           case "subset":
+           //m_GridView.cells(rID,6).setValue("set up position filter");
+           l_filterCombo.addOption([["addPosFilter","new position filter"]]);
            break;
            default:
             m_GridView.cells(rID,6).setValue("");
            break;
        }
     }
+
+    if(cInd == 6)
+    {
+         switch(nValue)
+       {
+           case "addPosFilter":
+           alert("add position");
+           m_Tabbar.addTab("posFilterTab","new pos filter");
+           m_Tabbar.goToNextTab();
+           m_Tabbar.appendObject(m_ToolBar);
+           break;
+           default:
+           break;
+       }
+    }
+
 }
 dhtmlxValidation.isBrackedOpenValidation = function(p_value)
 {
-    var pattern= new RegExp("^[()]*$");
+    var pattern= new RegExp("^[(]*$");
+    return pattern.test(p_value);
+}
+
+dhtmlxValidation.isBrackedCloseValidation = function(p_value)
+{
+    var pattern= new RegExp("^[)]*$");
     return pattern.test(p_value);
 }
 
